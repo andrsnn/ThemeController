@@ -1,7 +1,8 @@
 define(function(require){
 
 
-	var View = require("../View/View");
+	var View = require("../bower_components/View/View");
+    var Backbone = require("../bower_components/backbone/backbone-min.js");
     //var View = require("")
 	var view = new View();
 
