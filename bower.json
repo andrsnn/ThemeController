@@ -22,7 +22,7 @@
     "backbone": "~1.2.1",
     "underscore": "~1.8.3",
     "jquery": "~2.1.4",
-    "View": "andrsnn/View#0.x",
-    "StyleSheet": "andrsnn/StyleSheet#0.x"
+    "View": "andrsnn/View",
+    "StyleSheet": "andrsnn/StyleSheet"
   }
 }
