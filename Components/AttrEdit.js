@@ -11,6 +11,7 @@ define(function(require){
                         '<div class="header control-label">Rule</div>',
                         '<input id="ruleInput" class="form-control" placeholder="Rule Name" value="',inputTwoValue,'"></input>',   
                         
+                        
                         "<div class='btn btn-primary' id='SaveStyle' type='button'>Save</div>",
                   '</div>'
             ];

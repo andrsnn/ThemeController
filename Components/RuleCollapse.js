@@ -46,6 +46,7 @@ define(function(require){
                                     "<div",{tail: true},"></div>",
                                     "<div style='padding-bottom:10px;'>",
                                     "<div style='float:left;' class='btn btn-primary' id='deleteStyle' type='button'>Delete</div>",
+                                    "<div class='btn btn-primary' id='SaveAllRules' type='button'>Save All Rules</div>",
                                     "<div class='btn btn-primary' id='rule' type='button'>New Rule</div>",
                                     "</div>",
                                     

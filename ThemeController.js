@@ -1,6 +1,6 @@
 define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,require){
 
-    
+    //need to add jquery.dom-outline-1.0 dependency
 
     var loader = new Loader();
 
@@ -154,23 +154,27 @@ define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,r
         	el: mainform.component,
         	component: mainform,
             minimizeComp:view.Component(Components.Minimized()),
+            
         	events: {
         		"click #newStyle":"newStyle",
                 "click #close":"closeThemeController",
                 "click #loadFile":"loadFile",
                 "click #exportCSS":"exportCSS",
                 "click #exportJSON":"exportJSON",
-                "click #minimize":"minimize"
+                "click #minimize":"minimize",
+                "click #inspect":"inspect"
         	},
             minimizedState: false,
         	initialize: function(){
+
+                this.collection.on("change", this.collectionChange, this);
                 var self = this;
                 var altDown = false;
                 var downArrow = false;
                 var upArrow = false;
                 var shiftDown = false;
                 document.addEventListener("keydown", function(e){
-                    console.log(e.which);
+                    
                     if (e.which == 18){
                         altDown = true;
                     }
@@ -184,7 +188,7 @@ define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,r
                         upArrow = true;
                     }
                     if (altDown && (downArrow || upArrow) && shiftDown){
-                        console.log('trig');
+                        
                         self.minimize();
                     }
                     
@@ -211,6 +215,7 @@ define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,r
         	render: function(){
         		this.collection.on("add", this.addStyle, this);
                 this.collection.on("change", this.collectionChange, this);
+                this.collection.on("destroy", this.collectionChange, this);
         		
         		var self = this;
         		
@@ -222,10 +227,13 @@ define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,r
 
         		return this;
         	},
-            collectionChange: function(x){
+            collectionChange: function(x,y,z){
                 //send ajax
-                console.log(x);
+                
             },
+            collectionDestroy: function(x,y,z){
+                
+            },  
         	addStyle: function(elem){
         		
         		//var Collapse = view.Component(Components.RuleCollapse());
@@ -346,7 +354,7 @@ define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,r
 
                 
 
-//                var encodedString = btoa(string);
+
                 link.href="data:application/json;base64,"+btoa(ret);
                 link.click();
 
@@ -378,6 +386,42 @@ define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,r
 
                 
                 
+            },
+            inspect: function(e){
+                var self = this;
+                var myDomOutline = DomOutline({ onClick: function(elem){
+                    
+                    
+                    var build = (function buildTargetString(elem){
+                        var tag = elem.tagName || elem.nodeName;
+                        //build += tag + " ";
+                        var next = elem.parentNode || elem.host;
+                        if (next && tag != "BODY"){
+                            
+                            
+                            return buildTargetString(next) + tag + " ";
+
+                        }
+                        else {
+                            return tag + " ";
+                        }
+                    })(elem);
+                    //for shadow dom
+                    build = build.replace(/#document-fragment/g, '/deep/');
+                    self.collection.add([
+                        {attr:build,rules:[],alias:""}
+                    ]);
+                    //{attr:"body *"}, "rules": [{"font-family":"garamond"}], "alias":"body"}
+                    self.minimize();
+
+                    
+                },
+                elem: "body /deep/ *"
+            });
+
+                // Start outline:
+                myDomOutline.start();
+                this.minimize();
             }
 
         });
@@ -432,7 +476,7 @@ define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,r
 
             },
             ruleDelete: function(model){
-                debugger;
+                
                 var rules = this.model.attributes.rules;
                 if (typeof rules === "undefined"){
 
@@ -463,6 +507,7 @@ define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,r
                 
                 var childStyleRuleController = new StyleRuleController({model:ruleObj,el:this.component.tail,
                             component:Components.Collapse, attr:model.attributes.attr, parentModel: model});
+
                 
             },
             addRuleClick: function(e){
@@ -519,6 +564,7 @@ define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,r
                         stylesheet.changeSelector(model.attr, ruleInput, function(err, state, msg){
                             
                             if (err){
+                                toastr.error(err);
                                 throw new Error(err);
                             }
                             if (state){
@@ -563,6 +609,8 @@ define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,r
 
                 
                 //toastr.success("Sucessfully deleted");
+                    
+                    
                     self.model.destroy();
                     self.undelegateEvents();
                     self.$el.removeData().unbind();
@@ -748,6 +796,7 @@ define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,r
                         toastr.error(err);
                         throw new Error(err);
                     }
+                    toastr.success(msg);
                     
                     });
                 }

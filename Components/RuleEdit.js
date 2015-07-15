@@ -6,7 +6,12 @@ define(function(require){
             return [
             	
                   '<div style="padding:10px;" class="form-group">',
-                        '<div class="header control-label">Rule Name</div>',                        
+                        '<div>',
+                        '<div class="header control-label">Rule Name',
+
+                        '</div>',                        
+                        '<div style="padding-left:5px;float:left;" id="help" class="mdi-action-help"></div>',
+                        '</div>',
                         '<input id="ruleKey" class="form-control" placeholder="Rule Name" value="',inputOneValue,'"></input>',   
                         '<div class="header control-label">Rule Value</div>',
                         '<input id="ruleValue" class="form-control" placeholder="Rule Value" value="',inputTwoValue,'"></input>',   
