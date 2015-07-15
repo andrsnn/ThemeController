@@ -1,13 +1,70 @@
-define(function(require){
+define(['jquery', 'backbone', 'Loader', 'require'], function($,Backbone,Loader,require){
 
+    
 
-	var View = require("../bower_components/View/View");
-    var Backbone = require("../bower_components/backbone/backbone-min.js");
+    var loader = new Loader();
+
+    var dfd = $.Deferred();
+
+    //var View = loader.get("View/View");
+	//var View = require("../bower_components/View/View");
+    //var Backbone = require("../bower_components/backbone/backbone-min.js");
     //var View = require("")
+    /*
+    var StyleSheet = loader.get("StyleSheet/StyleSheet");
+
+    var Components = {
+        MainForm: loader.get("ThemeController/Components/MainForm"),
+        Collapse: loader.get("ThemeController/Components/Collapse"),
+        RuleCollapse: loader.get("ThemeController/Components/RuleCollapse"),
+        AttrEdit: loader.get("ThemeController/Components/AttrEdit"),
+        RuleEdit: loader.get("ThemeController/Components/RuleEdit")
+        //CollapseExtend: require("./Components/CollapseExtend")
+
+    };
+*/
+
+
+    loader.get(
+        "View/View", 
+        "StyleSheet/StyleSheet",
+        "devbridge-autocomplete/dist/jquery.autocomplete",
+        //components
+        "ThemeController/Components/MainForm",
+        "ThemeController/Components/Collapse",
+        "ThemeController/Components/RuleCollapse",
+        "ThemeController/Components/AttrEdit",
+        "ThemeController/Components/RuleEdit",
+        "ThemeController/Components/Minimized"
+        ).then(function(
+            View, 
+            StyleSheet,
+            autocomplete,
+            MainForm,
+            Collapse,
+            RuleCollapse,
+            AttrEdit,
+            RuleEdit,
+            Minimized
+            ){   
+
+        var Components = {
+            MainForm: MainForm,
+            Collapse: Collapse,
+            RuleCollapse: RuleCollapse,
+            AtrrEdit: AttrEdit,
+            RuleEdit: RuleEdit,
+            Minimized: Minimized
+        };
+        
+
+        
+
+
 	var view = new View();
 
 	//var hashmap = require("./hashmap/hashmap");
-	var StyleSheet = require("./StyleSheet/StyleSheet");
+	//var StyleSheet = require("./StyleSheet/StyleSheet");
 	var stylesheet = new StyleSheet();
 /*
     stylesheet.addAttribute("div", function(error, state, msg){
@@ -25,15 +82,7 @@ define(function(require){
 */
 
 
-	var Components = {
-		MainForm: require("./Components/MainForm"),
-		Collapse: require("./Components/Collapse"),
-		RuleCollapse: require("./Components/RuleCollapse"),
-        AttrEdit: require("./Components/AttrEdit"),
-        RuleEdit: require("./Components/RuleEdit")
-        //CollapseExtend: require("./Components/CollapseExtend")
-
-	};
+	
 
 	var mainform = null;
 
@@ -58,7 +107,7 @@ define(function(require){
 		//console.log('working');
 	}
 
-	return function(options){
+    dfd.resolve(function(options){
 		
 
 
@@ -100,15 +149,62 @@ define(function(require){
             model: S
         });
 
-        //main controller
+        //Theme Creator controller
         var StylesController = Backbone.View.extend({
         	el: mainform.component,
         	component: mainform,
+            minimizeComp:view.Component(Components.Minimized()),
         	events: {
-        		"click":"clickEvent"
+        		"click #newStyle":"newStyle",
+                "click #close":"closeThemeController",
+                "click #loadFile":"loadFile",
+                "click #exportCSS":"exportCSS",
+                "click #exportJSON":"exportJSON",
+                "click #minimize":"minimize"
         	},
+            minimizedState: false,
         	initialize: function(){
+                var self = this;
+                var altDown = false;
+                var downArrow = false;
+                var upArrow = false;
+                var shiftDown = false;
+                document.addEventListener("keydown", function(e){
+                    console.log(e.which);
+                    if (e.which == 18){
+                        altDown = true;
+                    }
+                    if (e.which == 40){
+                        downArrow = true;
+                    }
+                    if (e.which == 16){
+                        shiftDown = true;
+                    }
+                    if (e.which == 38){
+                        upArrow = true;
+                    }
+                    if (altDown && (downArrow || upArrow) && shiftDown){
+                        console.log('trig');
+                        self.minimize();
+                    }
+                    
+                }, false);
 
+                document.addEventListener("keyup", function(e){
+                    if (e.which == 18){
+                        altDown = false;
+                    }
+                    if (e.which == 40){
+                        downArrow = false;
+                    }
+                    if (e.which == 16){
+                        shiftDown = false;
+                    }
+                    if (e.which == 38){
+                        upArrow = false;
+                    }
+                }, false);
+                this.minimize();
         		this.render();
         		
         	},
@@ -144,21 +240,149 @@ define(function(require){
         		//console.log('added', x);
         		//this.processStyle(x);
         	},
-        	clickEvent: function(e){
-
+        	newStyle: function(e){
+                this.collection.add({});
+                /*
         		//this.processStyle()
         		if (e.target.innerText === "NEW"){
                     
         			this.collection.add({});
         		}
-        		
+        		*/
         		
         		//console.log(e);
-        	}
+        	},
+            closeThemeController: function(){
+
+            },
+            loadFile: function(e){
+                   var target = e.target;
+                   var self = this;
+                if (target.tagName == "INPUT"){
+
+                }
+                else {
+                    
+                   
+
+                    $( target.firstElementChild ).change(function(e) {
+                        console.log(self);
+                        //grab the first image in the fileList
+                        //in this example we are only loading one file.
+                        //console.log(this.files[0].size);
+                        //console.log(this.files);
+                        //renderImage(this.files[0])
+                        var callee = arguments.callee;
+                        var reader = new FileReader();
+
+                        reader.onload = function(event){
+                            
+                            //the_url = event.target.result
+                      //of course using a template library like handlebars.js is a better solution than just inserting a string
+                            //$('#preview').html("<img src='"+the_url+"' />")
+                            // $('#name').html(file.name)
+                            // $('#size').html(humanFileSize(file.size, "MB"))
+                            // $('#type').html(file.type)
+                            
+                            if (event.target.result.split(";")[0] != "data:application/json"){
+                                toastr.error("File must have a .json extension!");
+                                return;
+                            }
+                            try {
+                                var decodedString = atob(event.target.result.split(",")[1]);
+                                decodedString = JSON.parse(decodedString);
+                            }
+                            catch (e){
+                                toastr.error("Error decoding file! Try again.");
+                            }
+                            target.firstElementChild.value = "";
+                            self.collection.set(decodedString);
+                            
+                            $(target.firstElementChild).unbind('change');
+
+                        }
+                    
+                    //when the file is read it triggers the onload event above.
+                        reader.readAsDataURL(this.files[0]);
+
+                    });
+                    
+                    target.firstElementChild.click();
+                }
+            },
+            exportCSS: function(e){
+                //e.stopPropagation();
+                //e.preventDefault();
+
+                
+                
+             
+                
+                
+                //console.log(target);
+                
+                
+            },
+            exportJSON: function(e){
+                var ret = "[";
+                for (var i = 0; i < this.collection.models.length; i++) {
+                    if (i+1 == this.collection.models.length){
+                        ret += JSON.stringify(this.collection.models[i].attributes);
+                    }
+                    else {
+                        ret += JSON.stringify(this.collection.models[i].attributes)+ ",";    
+                    }
+                    
+                }
+                ret += "]";
+                
+                
+                
+                var link = document.createElement("a");
+                link.download = "Theme.json";
+                
+                
+
+
+                
+
+//                var encodedString = btoa(string);
+                link.href="data:application/json;base64,"+btoa(ret);
+                link.click();
+
+            },
+            minimize: function(e){
+
+                
+                if (typeof this.minimizeComp.component.parentNode === "undefined" ||
+                    this.minimizeComp.component.parentNode == null){
+                    $(this.$el[0].parentNode).hide();
+                
+                
+
+                    document.querySelector('body').appendChild(this.minimizeComp.component);
+                    
+                    var self = this;
+
+                    this.minimizeComp.component.addEventListener("click", function(e){
+
+                        document.querySelector('body').removeChild(self.minimizeComp.component);
+                        $(self.$el[0].parentNode).show();
+                        e.currentTarget.removeEventListener('click', arguments.callee);
+                        
+                    } ,false);
+                }
+                else {
+                    this.minimizeComp.component.click();
+                }
+
+                
+                
+            }
 
         });
         
-        //sub controller
+        //sub controller, per Style (body *)
         var StyleAttrController = Backbone.View.extend({
         	events: {
         		"click #rule": "addRuleClick",
@@ -182,40 +406,55 @@ define(function(require){
                 this.setElement(Collapse.component);
                 this.render();
 
-                //self.addSubRules(this.model.attributes);
-                
-                /*
-                this.model.attributes.forEach(function(elem,index){
-                    self.addSubRules();
-                });
-*/
-        		
         	},
         	render: function(){
+
         		this.add();
         		
         	},
             ruleChanged: function(newObj,old){
-               var found = this.model.attributes.rules.indexOf(newObj);
+               
+                
+                if (typeof this.model.attributes.rules === "undefined" ||
+                    this.model.attributes.rules == null){
+                    this.model.attributes.rules = [];
+                }
+                else {
+                     var found = this.model.attributes.rules.indexOf(newObj);
 
-               //if newObj isn't on rules array that means new rule
-               if (found === -1){
-                this.model.attributes.rules.push(newObj);
-               }
+                   //if newObj isn't on rules array that means new rule
+                   if (found === -1){
+                    
+                    this.model.attributes.rules.push(newObj);
+                   }
+                }
+              
 
             },
             ruleDelete: function(model){
+                debugger;
                 var rules = this.model.attributes.rules;
-                rules.splice(rules.indexOf(model),1);
+                if (typeof rules === "undefined"){
+
+                }
+                else {
+
+                    rules.splice(rules.indexOf(model),1);
+
+                    if (rules.length == 0){
+                        rules = null;
+                    }
+                }
+                
                 
             },
             modelChanged: function(x){
                 
                 var header = this.$el[0].querySelector("#header");
                 var model = this.model.attributes;
-
+                
                 header.innerText = typeof model.alias === "undefined"
-                    || model.alias === "undefined" || model.alias.length == 0 
+                    || model.alias == "undefined" || model.alias.length == 0 
                     ? model.attr : model.alias;
             },
             addRule: function(ruleObj){
@@ -232,15 +471,29 @@ define(function(require){
         	add: function(){
                 var self = this;
         		var model = this.model.attributes;
+
+                var header = this.$el[0].querySelector("#header");
+                
+                
+                header.innerText = typeof model.alias === "undefined"
+                    || model.alias == "undefined" || model.alias.length == 0 
+                    ? model.attr : model.alias;
                 
                 if (typeof model.attr === "undefined"
                     || model.attr.length == 0){
                     return;
                 }
-
+                
                 stylesheet.addAttribute(model.attr, function(err,state,msg){
                     if (err){
                         throw new Error(err);
+                    }
+                    if (state){
+                        toastr.success(msg);
+                    }
+                    else {
+                        toastr.error(msg);
+                        return;
                     }
 
                     model.rules.forEach(function(elem,index){
@@ -258,48 +511,97 @@ define(function(require){
                 var aliasInput = this.$el[0].querySelector('#aliasInput').value;
 
                 var model = this.model.attributes;
-
-                if (typeof model.attr !== "undefined"){
-                     stylesheet.removeAttribute(model.attr,function(err,state,msg){
-                    if (err){
-                        
-                        throw new Error(err);
+                
+                //rule attribute changed
+                if (ruleInput !== model.atrr){
+                    if (typeof ruleInput !== "undefined" ||
+                        typeof model.attr !== "undefined"){
+                        stylesheet.changeSelector(model.attr, ruleInput, function(err, state, msg){
+                            
+                            if (err){
+                                throw new Error(err);
+                            }
+                            if (state){
+                                toastr.success(msg);
+                            }
+                            else if (!state){
+                                toastr.error(msg);
+                            }
+                        });
                     }
-                    if (state){
-                        toastr.success(msg);
-                    }
-                    else if (!state && typeof state !== "undefined"){
-                        
-                        toastr.error(msg);
-                    }
-
-                 });
+                    
+                    
                 }
-                
-               if (typeof model.rules === "undefined"){
-                    this.model.set({attr:ruleInput, alias: aliasInput, rules: []})
-               }    
-               else {
-                    this.model.set({attr:ruleInput, alias:aliasInput});
-               }
+                //alias attribute changed
+                if (aliasInput !== model.alias &&
+                    aliasInput !== "undefined"){
+                    //this.model.set({alias: aliasInput});
+                    toastr.success("Sucessfully changed Alias");
+                }
+                var rules;
+                if (typeof this.model.attributes.rules === "undefined"){
+                    rules = null;
+                }
+                else {
+                    rules = this.model.attributes.rules;
+                }
 
-                
-                this.add();
+                this.model.set({attr:ruleInput, alias: aliasInput, rules: rules});
+
                 
 
 
             },
             deleteStyle: function(e){
-                console.log(e);
+                var self = this;
+                var msg = "Successfully deleted.";
+                var error = false;
+
+                var attr = (
+                                typeof self.model.attributes.alias === "undefined" ||
+                                self.model.attributes.alias == "undefined") ? self.model.attributes.attr : self.model.attributes.alias;
+
+                
+                //toastr.success("Sucessfully deleted");
+                    self.model.destroy();
+                    self.undelegateEvents();
+                    self.$el.removeData().unbind();
+                    self.remove();
+                    Backbone.View.prototype.remove.call(self);
+                
+                
+                    stylesheet.removeAttribute(this.model.attributes.attr, function(err,state,message){
+                        if (err){
+                            msg = err;
+                            error = true;
+                            //throw new Error(err);
+                        }
+                        else {
+                            msg = message;
+                        }
+                            
+                        
+
+                        if (error){
+                            toastr.error(msg);
+                        }
+                        else {
+                            toastr.success(msg);
+                        }
+                    });
+                
+                
+               
             }
         });
     
-        //sub sub controller
+        //sub sub controller, per rule (font-family:garamond)
         var StyleRuleController = Backbone.View.extend({
         	events: {
                 //"click #rule": "addRuleClick",
                 "click #SaveRule": "saveRule",
-                "click #DeleteRule": "deleteRule"
+                "click #DeleteRule": "deleteRule",
+                "click #help":"help"
 
             },
         	initialize: function(options){
@@ -347,6 +649,7 @@ define(function(require){
         		
         	},
             saveRule: function(){
+                
                 var ruleKey = this.$el[0].querySelector('#ruleKey').value;
                 var ruleValue = this.$el[0].querySelector('#ruleValue').value;
 
@@ -355,9 +658,12 @@ define(function(require){
                  for (key in model){
                     value = model[key];
                  }
-                 
+
+
+                 if (key !== "No Rule"){
                  stylesheet.removeRule(this.attr,model,function(err,state,msg){
                     if (err){
+                        toastr.error(err);
                         throw new Error(err);
                     }
                     else if (state){
@@ -368,12 +674,16 @@ define(function(require){
                     }
 
                  });
+                }
+                else {
+
+                }
 
                 var ret = {};
 
                 
 
-
+                
                 ret[ruleKey] = ruleValue;
                 
                 delete model[key];
@@ -384,7 +694,7 @@ define(function(require){
                 
                 
                 this.parentModel.trigger('change:rules', this.model,old);
-               
+                
                 this.applyRule();
             },
             deleteRule: function(){
@@ -395,10 +705,15 @@ define(function(require){
                 for (key in model){
                     value = model[key];
                 }
-                if (key !== "No Rule" || value !== "undefined"){
+
+                var msg = "Rule deleted.";
+                var error =false;
+                
+                if (key != "No Rule" || value != "undefined"){
                 stylesheet.removeRule(this.attr,this.model,function(err,state,msg){
                     if (err){
-                        throw new Error(err);
+                        toastr.error(err);
+                        //throw new Error(err);
                     }
                     else if (state){
                         toastr.success(msg);
@@ -429,15 +744,18 @@ define(function(require){
                 if (key !== "No Rule" || value !== "undefined"){
                     stylesheet.addRule(this.attr,model, function(err,state,msg){
                     if (err){
+
+                        toastr.error(err);
                         throw new Error(err);
                     }
+                    
                     });
                 }
                 
                 
             },
             destroyView: function() {
-
+                
                 // COMPLETELY UNBIND THE VIEW
                 this.undelegateEvents();
 
@@ -447,6 +765,25 @@ define(function(require){
                 this.remove();  
                 Backbone.View.prototype.remove.call(this);
 
+            },
+            help: function(e){
+                var elem = this.$el[0].querySelector("#ruleKey");
+                if (elem.value != "No Rule"){
+                    console.log(elem.value);
+                    var url = "http://www.w3schools.com/cssref/pr_";
+                    if (elem.value.indexOf("font") != -1){
+                        url += "font_";
+                    }
+                    //var url = "http://www.w3schools.com/cssref/pr_border-width.asp";
+                    
+                    url += elem.value+".asp";
+                    var win = window.open(url, '_blank');
+                    win.focus();
+                }
+                else {
+                    toastr.warning("Cannot have 'No Rule'!");
+                }
+                
             }
         });
 
@@ -454,7 +791,8 @@ define(function(require){
        
 
         var StyleData = [
-            {attr:"div div", "rules": [{"background-color": "red"}], "alias":""}
+
+            //{attr:"body *"}, "rules": [{"font-family":"garamond"}], "alias":"body"}
             
         ];
         /*
@@ -478,6 +816,10 @@ define(function(require){
 
 
 
-	}
+	});
+
+    
+    });
+return dfd.promise();
 
 });

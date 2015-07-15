@@ -15,6 +15,9 @@ define(function(require){
                   }
             };
 
+
+            
+
             var SaveCallback = {
                   event: {
                         event: "click",
@@ -25,13 +28,18 @@ define(function(require){
             	"<div class='themeController jumbotron'>",
                         "<div class='modal-header'>",
                               "<div type='button' data-dismiss='modal' aria-hidden='true' class='close'>x</div>",
-                              "<h4 class='modal-title'>Header Controller</h4>",
+                              "<h4 class='modal-title'>Theme Maker</h4>",
                               "<div ", {tail:true}, "class='modal-footer' style='border-top-width: 0px;'></div>",
                         "</div>",
                         "<div class='modal-footer' style='border-top-width: 0px;'>",
-                              "<div ", NewEvent, "class='btn btn-primary' type='button' style='float: left;'>New</div>",
+                              "<div ", NewEvent, "class='btn btn-primary' id='newStyle' type='button' style='float: left;'>New Style</div>",
                               "<div class='btn btn-primary' type='button'>Close</div>",
-                              "<div class='btn btn-primary' type='button'>Save</div>",
+                              "<div class='btn btn-primary' id='loadFile' type='button'>Load File",
+                              "<input style='display:none;' type='file'></input>",
+                              "</div>",
+                              "<div class='btn btn-primary' id='exportCSS' type='button'>Export CSS</div>",
+                              "<div class='btn btn-primary' id='exportJSON' type='button'>Export JSON</div>",
+                              
                         "</div>",
                   "</div>"
 
